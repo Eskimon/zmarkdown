@@ -48,6 +48,7 @@
     "remark-ping": "^1.0.13",
     "remark-rehype": "^3.0.0",
     "remark-sub-super": "^1.0.10",
+    "remark-toc": "^5.0.0",
     "textr": "^0.3.0",
     "to-vfile": "^2.1.2",
     "typographic-apostrophes": "^1.1.1",

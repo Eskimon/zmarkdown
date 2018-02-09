@@ -281,6 +281,12 @@ const remarkConfig = {
     maxlength: 1000000,
     dirSizeLimit: 10000000,
   },
+
+  toc: {
+    heading: 'Sommaire',
+    maxDepth: 3,
+    tight: true,
+  },
 }
 
 module.exports = remarkConfig

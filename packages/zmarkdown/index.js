@@ -8,6 +8,7 @@ const clone = require('clone')
 
 const createWrapper = require('./utils/wrappers')
 const remarkParse = require('remark-parse')
+const remarkToc = require('remark-toc')
 
 const remarkAbbr = require('remark-abbr/src')
 const remarkAlign = require('remark-align/src')
@@ -97,6 +98,7 @@ const zmdParser = (config, target) => {
     .use(remarkPing, config.ping)
     .use(remarkSubSuper)
     .use(remarkTrailingSpaceHeading)
+    .use(remarkToc, config.toc)
     .use(() => (tree, file) => {
       // if we don't have any headings, we add a flag to disable
       // the Table of Contents directly in the latex template
