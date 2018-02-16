@@ -14,3 +14,11 @@
 | **error**
 | foo bar··
 | baz
+
+[[e | a bad error]]
+| **error**
+| foo bar··
+| baz
+
+[[neutre | **title**]]
+| foo

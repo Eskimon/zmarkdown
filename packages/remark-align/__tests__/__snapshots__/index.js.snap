@@ -77,6 +77,29 @@ exports[`center-no-start 1`] = `
 <h1>title</h1>"
 `;
 
+exports[`compiles to markdown 1`] = `
+"# title
+
+<- foo <-
+
+# title
+
+-> **foo** <-
+
+-> ![img](src) ->
+
+# wraps blocks e.g. title:
+
+->
+foo
+
+# title
+
+foo
+->
+"
+`;
+
 exports[`escapable 1`] = `
 "<h1>title</h1>
 <div class=\\"align-center\\"><p>->escaped-in</p></div>
@@ -100,6 +123,18 @@ exports[`list-block 1`] = `
 <li>c</li>
 <li>d</li>
 </ul></div>"
+`;
+
+exports[`no content 1`] = `
+"<div class=\\"align-left\\"></div>
+<div class=\\"align-left\\"></div>
+<div class=\\"align-center\\"></div>
+<div class=\\"align-center\\"></div>
+<div class=\\"align-center\\"></div>
+<div class=\\"align-right\\"></div>
+<div class=\\"align-right\\"></div>
+<div class=\\"align-right\\"></div>
+<div class=\\"align-right\\"></div>"
 `;
 
 exports[`right-no-end 1`] = `

@@ -173,7 +173,19 @@ question \\\\texttt{coded}
 \\\\textbf{error}
 foo bar \\\\\\\\
 baz
-\\\\end{Error}"
+\\\\end{Error}
+
+
+\\\\begin{Error}[a bad error]
+\\\\textbf{error}
+foo bar \\\\\\\\
+baz
+\\\\end{Error}
+
+
+\\\\begin{Neutre}[\\\\textbf{title}]
+foo
+\\\\end{Neutre}"
 `;
 
 exports[`emoticon 1`] = `"foo :p bar \\\\smiley{smile}"`;

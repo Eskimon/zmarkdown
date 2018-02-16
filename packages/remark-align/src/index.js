@@ -105,4 +105,32 @@ module.exports = function plugin (classNames = {}) {
   const blockMethods = Parser.prototype.blockMethods
   blockTokenizers.align_blocks = alignTokenizer
   blockMethods.splice(blockMethods.indexOf('fencedCode') + 1, 0, 'align_blocks')
+
+  const Compiler = this.Compiler
+
+  // Stringify
+  if (Compiler) {
+    const visitors = Compiler.prototype.visitors
+    const alignCompiler = function (node) {
+      const innerContent = this.all(node)
+
+      const markers = {
+        left: ['<-', '<-'],
+        right: ['->', '->'],
+        center: ['->', '<-'],
+      }
+      const alignType = node.type.slice(0, -7)
+
+      if (!markers[alignType]) return innerContent.join('\n\n')
+
+      const [start, end] = markers[alignType]
+
+      if (innerContent.length < 2) return `${start} ${innerContent.join('\n').trim()} ${end}`
+
+      return `${start}\n${innerContent.join('\n\n').trim()}\n${end}`
+    }
+    visitors.leftAligned = alignCompiler
+    visitors.rightAligned = alignCompiler
+    visitors.centerAligned = alignCompiler
+  }
 }

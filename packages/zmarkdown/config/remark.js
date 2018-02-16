@@ -18,6 +18,7 @@ const textrQuestionMark = require('typographic-question-mark/src')
 const textrSemicolon = require('typographic-semicolon/src')
 
 const remarkConfig = {
+  maxNesting: 100,
   reParse: {
     gfm: true,
     commonmark: false,
@@ -76,16 +77,54 @@ const remarkConfig = {
   },
 
   customBlocks: {
-    secret: 'spoiler',
-    s: 'spoiler',
-    information: 'alert alert-primary',
-    i: 'alert alert-primary',
-    question: 'alert alert-info',
-    q: 'alert alert-info',
-    attention: 'alert alert-warning',
-    a: 'alert alert-warning',
-    erreur: 'alert alert-danger',
-    e: 'alert alert-danger',
+    secret: {
+      classes: 'custom-block-spoiler',
+      title: 'optional',
+    },
+    s: {
+      classes: 'custom-block-spoiler',
+      title: 'optional',
+    },
+    information: {
+      classes: 'custom-block-information',
+      title: 'optional',
+    },
+    i: {
+      classes: 'custom-block-information',
+      title: 'optional',
+    },
+    question: {
+      classes: 'custom-block-question',
+      title: 'optional',
+    },
+    q: {
+      classes: 'custom-block-question',
+      title: 'optional',
+    },
+    attention: {
+      classes: 'custom-block-warning',
+      title: 'optional',
+    },
+    a: {
+      classes: 'custom-block-warning',
+      title: 'optional',
+    },
+    erreur: {
+      classes: 'custom-block-error',
+      title: 'optional',
+    },
+    e: {
+      classes: 'custom-block-error',
+      title: 'optional',
+    },
+    neutre: {
+      classes: 'custom-block-neutral',
+      title: 'required',
+    },
+    n: {
+      classes: 'custom-block-neutral',
+      title: 'required',
+    },
   },
 
   escapeEscaped: ['&'],

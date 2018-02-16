@@ -3,6 +3,7 @@ import unified from 'unified'
 import reParse from 'remark-parse'
 import stringify from 'rehype-stringify'
 import remark2rehype from 'remark-rehype'
+const remarkStringify = require('remark-stringify')
 
 import remarkAlign from '../src/'
 
@@ -12,6 +13,13 @@ const render = (text, config) => unified()
   .use(remark2rehype)
   .use(stringify)
   .processSync(text)
+
+const renderToMarkdown = (text, config) => unified()
+  .use(reParse)
+  .use(remarkStringify)
+  .use(remarkAlign, config)
+  .processSync(text)
+
 
 const alignFixture = dedent`
   Test align
@@ -165,4 +173,72 @@ test('left align', () => {
     # title
   `)
   expect(contents).toMatchSnapshot()
+})
+
+test('no content', () => {
+  const md = dedent`
+    <- <-
+
+    <-
+
+    <-
+
+    -> <-
+
+    -><-
+
+    ->
+
+    <-
+
+    ->->
+
+    ->  ->
+
+    ->
+    ->
+
+    ->
+
+    ->
+  `
+
+  const {contents} = render(md)
+  expect(contents).toMatchSnapshot()
+
+  const contents1 = renderToMarkdown(md).contents
+  const contents2 = renderToMarkdown(contents1).contents
+
+  expect(contents1).toBe(contents2)
+})
+
+test('compiles to markdown', () => {
+  const md = dedent`
+    # title
+
+    <- foo <-
+
+    # title
+
+    -> **foo** <-
+
+    ->
+    ![img](src)
+    ->
+
+    # wraps blocks e.g. title:
+
+    -> foo
+
+    # title
+
+    foo ->
+  `
+  const {contents} = renderToMarkdown(md)
+  expect(contents).toMatchSnapshot()
+
+  const contents1 = renderToMarkdown(md).contents
+  const contents2 = renderToMarkdown(contents1).contents
+
+  expect(contents1).toBe(contents2)
 })
