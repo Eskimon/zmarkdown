@@ -324,7 +324,7 @@ const remarkConfig = {
 
   toc: {
     heading: 'Sommaire',
-    maxDepth: 3,
+    maxDepth: 6,
     tight: true,
   },
 }
