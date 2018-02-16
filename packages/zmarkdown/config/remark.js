@@ -72,8 +72,9 @@ const remarkConfig = {
   footnotesTitles: 'Retourner au texte de la note $id',
 
   alignBlocks: {
-    center: 'align-center',
-    right: 'align-right',
+    center: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
   },
 
   customBlocks: {
@@ -86,43 +87,43 @@ const remarkConfig = {
       title: 'optional',
     },
     information: {
-      classes: 'custom-block-information',
+      classes: 'alert alert-primary',
       title: 'optional',
     },
     i: {
-      classes: 'custom-block-information',
+      classes: 'alert alert-primary',
       title: 'optional',
     },
     question: {
-      classes: 'custom-block-question',
+      classes: 'alert alert-info',
       title: 'optional',
     },
     q: {
-      classes: 'custom-block-question',
+      classes: 'alert alert-info',
       title: 'optional',
     },
     attention: {
-      classes: 'custom-block-warning',
+      classes: 'alert alert-warning',
       title: 'optional',
     },
     a: {
-      classes: 'custom-block-warning',
+      classes: 'alert alert-warning',
       title: 'optional',
     },
     erreur: {
-      classes: 'custom-block-error',
+      classes: 'alert alert-danger',
       title: 'optional',
     },
     e: {
-      classes: 'custom-block-error',
+      classes: 'alert alert-danger',
       title: 'optional',
     },
     neutre: {
-      classes: 'custom-block-neutral',
+      classes: 'alert alert-secondary',
       title: 'required',
     },
     n: {
-      classes: 'custom-block-neutral',
+      classes: 'alert alert-secondary',
       title: 'required',
     },
   },
@@ -262,7 +263,7 @@ const remarkConfig = {
     },
     'www.jsfiddle.net': {
       tag: 'iframe',
-      width: 560,
+      width: '100%',
       height: 560,
       disabled: false,
       replace: [
@@ -277,7 +278,7 @@ const remarkConfig = {
     },
     'jsfiddle.net': {
       tag: 'iframe',
-      width: 560,
+      width: '100%',
       height: 560,
       disabled: false,
       replace: [
