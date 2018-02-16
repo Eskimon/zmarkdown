@@ -56,7 +56,7 @@ const remarkConfig = {
   },
 
   autolinkHeadings: {
-    behaviour: 'append',
+    behaviour: 'prepend',
   },
 
   headingShifter: 0,
