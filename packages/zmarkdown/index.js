@@ -98,7 +98,6 @@ const zmdParser = (config, target) => {
     .use(remarkPing, config.ping)
     .use(remarkSubSuper)
     .use(remarkTrailingSpaceHeading)
-    .use(remarkToc, config.toc)
     .use(() => (tree, vfile) => {
       // if we don't have any headings, we add a flag to disable
       // the Table of Contents directly in the latex template
@@ -126,6 +125,7 @@ function getLatexProcessor (remarkConfig, rebberConfig, target) {
 
 function getHTMLProcessor (remarkConfig, rebberConfig, target) {
   const parser = zmdParser(remarkConfig, target)
+    .use(remarkToc, remarkConfig.toc)
     .use(remark2rehype, remarkConfig.remark2rehype)
 
   if (!remarkConfig._test) {
