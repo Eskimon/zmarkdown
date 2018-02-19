@@ -127,6 +127,13 @@ function getHTMLProcessor (remarkConfig, rebberConfig, target) {
   const parser = zmdParser(remarkConfig, target)
     .use(remarkToc, remarkConfig.toc)
     .use(remark2rehype, remarkConfig.remark2rehype)
+    .use(() => (tree, vfile) => {
+      visit(tree, 'element', (node) => {
+        if (node.tagName === 'a') {
+          node.href = decodeURI(node.href)
+        }
+      })
+    })
 
   if (!remarkConfig._test) {
     parser
