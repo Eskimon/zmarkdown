@@ -130,7 +130,12 @@ function getHTMLProcessor (remarkConfig, rebberConfig, target) {
     .use(() => (tree, vfile) => {
       visit(tree, 'element', (node) => {
         if (node.tagName === 'a') {
-          node.href = decodeURI(node.href)
+          node.properties.href = decodeURI(node.properties.href)
+        }
+        if (node.tagName === 'table') {
+          if (node.properties.className === undefined)
+            node.properties.className = ''
+          node.properties.className += ' table table-bordered table-striped'
         }
       })
     })
