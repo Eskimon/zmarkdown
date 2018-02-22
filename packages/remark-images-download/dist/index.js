@@ -144,7 +144,9 @@ function plugin() {
             });
           };
 
-          request.get(url).on('response', function () {
+          request.get(url, function (err) {
+            if (err) reject(err);
+          }).on('response', function () {
             var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 headers = _ref2.headers,
                 statusCode = _ref2.statusCode;
@@ -168,7 +170,6 @@ function plugin() {
             totalDownloadedSize += fileSize;
           }).on('response', function (res) {
             res.once('data', function (chunk) {
-              res.destroy();
               var type = fileType(chunk) || { mime: '' };
               if (type.mime.slice(0, 6) !== 'image/' && !isSvg(chunk.toString())) {
                 if (type.mime) {
