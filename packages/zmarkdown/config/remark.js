@@ -316,8 +316,8 @@ const remarkConfig = {
   disableTokenizers: {},
 
   imagesDownload: {
-    disabled: true,
-    downloadDestination: './img/',
+    disabled: false,
+    downloadDestination: '/tmp/test/',
     maxlength: 1000000,
     dirSizeLimit: 10000000,
   },
