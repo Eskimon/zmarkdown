@@ -55,7 +55,7 @@ module.exports = function markdownHandlers (Raven) {
     const target = 'html'
 
     opts.heading_shift = 2
-    opts.disable_images_download = false
+    opts.disable_images_download = true
 
     render(target, markdown, opts, callback)
   }
