@@ -57,6 +57,12 @@ const remarkConfig = {
 
   autolinkHeadings: {
     behaviour: 'prepend',
+    content: {
+      type: 'element',
+      tagName: 'span',
+      properties: {className: ['es-autolink-heading']},
+      children: []
+    }
   },
 
   headingShifter: 0,
