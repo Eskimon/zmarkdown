@@ -7,6 +7,32 @@ function escapeRegExp (str) {
 const C_NEWLINE = '\n'
 const C_FENCE = '|'
 
+function compilerFactory (nodeType) {
+  let text
+  let title
+
+  return {
+    blockHeading (node) {
+      title = this.all(node).join('')
+      return ''
+    },
+    blockBody (node) {
+      text = this.all(node).map(s => s.replace(/\n/g, '\n| ')).join('\n|\n| ')
+      return text
+    },
+    block (node) {
+      text = ''
+      title = ''
+      this.all(node)
+      if (title) {
+        return `[[${nodeType} | ${title}]]\n| ${text}`
+      } else {
+        return `[[${nodeType}]]\n| ${text}`
+      }
+    },
+  }
+}
+
 module.exports = function blockPlugin (availableBlocks = {}) {
   const pattern = Object
     .keys(availableBlocks)
@@ -17,7 +43,7 @@ module.exports = function blockPlugin (availableBlocks = {}) {
     throw new Error('remark-custom-blocks needs to be passed a configuration object as option')
   }
 
-  const regex = new RegExp(`\\[\\[(${pattern})(?: *\\| *(.*))?\\]\\]`)
+  const regex = new RegExp(`\\[\\[(${pattern})(?: *\\| *(.*))?\\]\\]\n`)
 
   function blockTokenizer (eat, value, silent) {
     const now = eat.now()
@@ -46,7 +72,8 @@ module.exports = function blockPlugin (availableBlocks = {}) {
     }
 
     const contentString = content.join(C_NEWLINE)
-    const stringToEat = eaten + C_NEWLINE + linesToEat.join(C_NEWLINE)
+
+    const stringToEat = eaten + linesToEat.join(C_NEWLINE)
 
     const potentialBlock = availableBlocks[blockType]
     const titleAllowed = potentialBlock.title &&
@@ -55,6 +82,7 @@ module.exports = function blockPlugin (availableBlocks = {}) {
 
     if (titleRequired && !blockTitle) return
     if (!titleAllowed && blockTitle) return
+
     const add = eat(stringToEat)
 
     const exit = this.enterBlock()
@@ -75,13 +103,14 @@ module.exports = function blockPlugin (availableBlocks = {}) {
       const titleNode = {
         type: `${blockType}CustomBlockHeading`,
         data: {
-          hName: 'div',
+          hName: potentialBlock.details ? 'summary' : 'div',
           hProperties: {
             className: 'custom-block-heading',
           },
         },
         children: this.tokenizeInline(blockTitle, now),
       }
+
       blockChildren.unshift(titleNode)
     }
 
@@ -91,7 +120,7 @@ module.exports = function blockPlugin (availableBlocks = {}) {
       type: `${blockType}CustomBlock`,
       children: blockChildren,
       data: {
-        hName: 'div',
+        hName: potentialBlock.details ? 'details' : 'div',
         hProperties: {
           className: ['custom-block', ...classList],
         },
@@ -106,7 +135,17 @@ module.exports = function blockPlugin (availableBlocks = {}) {
   const blockMethods = Parser.prototype.blockMethods
   blockTokenizers.customBlocks = blockTokenizer
   blockMethods.splice(blockMethods.indexOf('fencedCode') + 1, 0, 'customBlocks')
-
+  const Compiler = this.Compiler
+  if (Compiler) {
+    const visitors = Compiler.prototype.visitors
+    if (!visitors) return
+    Object.keys(availableBlocks).forEach(key => {
+      const compiler = compilerFactory(key)
+      visitors[`${key}CustomBlock`] = compiler.block
+      visitors[`${key}CustomBlockHeading`] = compiler.blockHeading
+      visitors[`${key}CustomBlockBody`] = compiler.blockBody
+    })
+  }
   // Inject into interrupt rules
   const interruptParagraph = Parser.prototype.interruptParagraph
   const interruptList = Parser.prototype.interruptList

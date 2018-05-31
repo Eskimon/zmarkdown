@@ -13,6 +13,34 @@ function escapeRegExp(str) {
 var C_NEWLINE = '\n';
 var C_FENCE = '|';
 
+function compilerFactory(nodeType) {
+  var text = void 0;
+  var title = void 0;
+
+  return {
+    blockHeading: function blockHeading(node) {
+      title = this.all(node).join('');
+      return '';
+    },
+    blockBody: function blockBody(node) {
+      text = this.all(node).map(function (s) {
+        return s.replace(/\n/g, '\n| ');
+      }).join('\n|\n| ');
+      return text;
+    },
+    block: function block(node) {
+      text = '';
+      title = '';
+      this.all(node);
+      if (title) {
+        return '[[' + nodeType + ' | ' + title + ']]\n| ' + text;
+      } else {
+        return '[[' + nodeType + ']]\n| ' + text;
+      }
+    }
+  };
+}
+
 module.exports = function blockPlugin() {
   var availableBlocks = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -22,7 +50,7 @@ module.exports = function blockPlugin() {
     throw new Error('remark-custom-blocks needs to be passed a configuration object as option');
   }
 
-  var regex = new RegExp('\\[\\[(' + pattern + ')(?: *\\| *(.*))?\\]\\]');
+  var regex = new RegExp('\\[\\[(' + pattern + ')(?: *\\| *(.*))?\\]\\]\n');
 
   function blockTokenizer(eat, value, silent) {
     var now = eat.now();
@@ -57,7 +85,8 @@ module.exports = function blockPlugin() {
     }
 
     var contentString = content.join(C_NEWLINE);
-    var stringToEat = eaten + C_NEWLINE + linesToEat.join(C_NEWLINE);
+
+    var stringToEat = eaten + linesToEat.join(C_NEWLINE);
 
     var potentialBlock = availableBlocks[blockType];
     var titleAllowed = potentialBlock.title && ['optional', 'required'].includes(potentialBlock.title);
@@ -65,6 +94,7 @@ module.exports = function blockPlugin() {
 
     if (titleRequired && !blockTitle) return;
     if (!titleAllowed && blockTitle) return;
+
     var add = eat(stringToEat);
 
     var exit = this.enterBlock();
@@ -85,13 +115,14 @@ module.exports = function blockPlugin() {
       var titleNode = {
         type: blockType + 'CustomBlockHeading',
         data: {
-          hName: 'div',
+          hName: potentialBlock.details ? 'summary' : 'div',
           hProperties: {
             className: 'custom-block-heading'
           }
         },
         children: this.tokenizeInline(blockTitle, now)
       };
+
       blockChildren.unshift(titleNode);
     }
 
@@ -101,7 +132,7 @@ module.exports = function blockPlugin() {
       type: blockType + 'CustomBlock',
       children: blockChildren,
       data: {
-        hName: 'div',
+        hName: potentialBlock.details ? 'details' : 'div',
         hProperties: {
           className: ['custom-block'].concat(_toConsumableArray(classList))
         }
@@ -116,7 +147,17 @@ module.exports = function blockPlugin() {
   var blockMethods = Parser.prototype.blockMethods;
   blockTokenizers.customBlocks = blockTokenizer;
   blockMethods.splice(blockMethods.indexOf('fencedCode') + 1, 0, 'customBlocks');
-
+  var Compiler = this.Compiler;
+  if (Compiler) {
+    var visitors = Compiler.prototype.visitors;
+    if (!visitors) return;
+    Object.keys(availableBlocks).forEach(function (key) {
+      var compiler = compilerFactory(key);
+      visitors[key + 'CustomBlock'] = compiler.block;
+      visitors[key + 'CustomBlockHeading'] = compiler.blockHeading;
+      visitors[key + 'CustomBlockBody'] = compiler.blockBody;
+    });
+  }
   // Inject into interrupt rules
   var interruptParagraph = Parser.prototype.interruptParagraph;
   var interruptList = Parser.prototype.interruptList;

@@ -1,6 +1,6 @@
 {
   "name": "remark-images-download",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "repository": {
     "url": "https://github.com/zestedesavoir/zmarkdown/tree/master/packages/remark-images-download",
     "type": "git"
@@ -34,7 +34,7 @@
   "dependencies": {
     "clone": "^2.1.1",
     "file-type": "^7.4.0",
-    "is-svg": "^2.1.0",
+    "is-svg": "^3.0.0",
     "read-chunk": "^2.1.0",
     "request": "^2.81.0",
     "rimraf": "^2.6.2",
@@ -44,7 +44,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-jest": "^22.0.4",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
     "clone": "^2.1.1",
     "cross-env": "^5.0.5",
     "dedent": "^0.7.0",

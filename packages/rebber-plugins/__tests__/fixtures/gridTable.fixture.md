@@ -1,7 +1,7 @@
 +-------+----------+------+
 | Sub   | Headings | ABBR |
 +=======+==========+======+
-| cell  | column spanning |
+| cell  | ABBR   spanning |
 | spans +----------+------+
 | rows  | normal   | cell |
 +-------+----------+------+
@@ -61,7 +61,7 @@ Table: The new table ABBR [^foot] with ||CTRL|| + ||S||
 +-------+----------+------+
 | Sub   | Headings | Too  |
 +=======+==========+======+
-| cell  | column spanning |
+| cell  | column[^foot]   |
 + spans +----------+------+
 | rows  | normal   | cell |
 +-------+----------+------+

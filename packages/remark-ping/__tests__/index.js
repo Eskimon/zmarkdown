@@ -9,7 +9,10 @@ import plugin from '../src/'
 
 const mockUsernames = [
   'I AM CLEM',
-  'dqsjdjsq',
+  'qux',
+  'foo',
+  'bar',
+  'baz baz',
 ]
 
 function pingUsername (username) {
@@ -41,16 +44,15 @@ const toMarkdown = text => unified()
 
 const fixtures = [
   dedent`
-    Test ping
-    =========
-
     ping @Clem
 
     ping @**FOO BAR**
 
-    no ping @dqsjdjsqjhdshqjkhfyhefezhjzjhdsjlfjlsqjdfjhsd
+    no ping @quxjhdshqjkhfyhefezhjzjhdsjlfjlsqjdfjhsd
 
-    no ping @**I AM CLEM**
+    ping [@**I AM CLEM**](http://example.com)
+
+    @**baz baz**
   `,
   dedent`
     ## Test ping @**I AM CLEM**
@@ -65,78 +67,85 @@ const fixtures = [
 
     > no metadata output @**I AM CLEM**
   `,
+  dedent`
+    @foo @bar
+
+    @baz baz
+
+    > @**baz baz**
+  `,
 ]
 
 const outputs = [
   dedent`
-    <h1>Test ping</h1>
     <p>ping @Clem</p>
     <p>ping @<strong>FOO BAR</strong></p>
-    <p>no ping @dqsjdjsqjhdshqjkhfyhefezhjzjhdsjlfjlsqjdfjhsd</p>
-    <p>no ping <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a></p>
+    <p>no ping @quxjhdshqjkhfyhefezhjzjhdsjlfjlsqjdfjhsd</p>
+    <p>ping <a href="http://example.com"><span class="ping ping-in-link">\
+    @<span class="ping-username">I AM CLEM</span></span></a></p>
+    <p><a href="/membres/voir/baz baz/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">baz baz</span></a></p>
   `,
   dedent`
-    <h2>\
-    Test ping \
-    <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a>\
-    </h2>
+    <h2>Test ping <a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></h2>
     <blockquote>
     <blockquote>
-    <p>\
-    no metadata output \
-    <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">\
-    I AM CLEM\
-    </a>\
-    </p>
+    <p>no metadata output <a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></p>
     </blockquote>
-    <p>\
-    no metadata output \
-    <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a>\
-    </p>
+    <p>no metadata output <a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></p>
     </blockquote>
-    <p>\
-    ping \
-    <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a>\
-    </p>
-    <p>\
-    ping \
-    <em><a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a></em>\
-    </p>
+    <p>ping <a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></p>
+    <p>ping <em><a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></em></p>
     <blockquote>
-    <p>\
-    no metadata output \
-    <a href="/membres/voir/I AM CLEM/" class="ping" rel="nofollow">I AM CLEM</a>\
-    </p>
+    <p>no metadata output <a href="/membres/voir/I AM CLEM/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">I AM CLEM</span></a></p>
+    </blockquote>
+  `,
+  dedent `
+    <p><a href="/membres/voir/foo/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">foo</span></a> \
+    <a href="/membres/voir/bar/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">bar</span></a></p>
+    <p>@baz baz</p>
+    <blockquote>
+    <p><a href="/membres/voir/baz baz/" rel="nofollow" class="ping ping-link">\
+    @<span class="ping-username">baz baz</span></a></p>
     </blockquote>
   `,
 ]
 
 const pings = [
-  ['I AM CLEM'],
+  ['I AM CLEM', 'baz baz'],
   ['I AM CLEM', 'I AM CLEM', 'I AM CLEM'],
+  ['foo', 'bar'],
 ]
 
 
 fixtures.forEach((fixture, i) => {
   describe(`fixture suite ${i}`, () => {
     test('parses', () => {
-      expect(remark(fixture)).toMatchSnapshot()
+      expect(remark(fixture)).toMatchSnapshot(`f${i}`)
     })
 
     test('sets ping data on vfile', () => {
-      expect(
+      return expect(
         toHTML(fixture).then(vfile => vfile.data.ping)
       ).resolves.toEqual(pings[i])
     })
 
     test('compiles to HTML', () => {
-      expect(
+      return expect(
         toHTML(fixture).then(vfile => vfile.contents)
       ).resolves.toBe(outputs[i])
     })
 
     test('compiles to Markdown', () => {
-      expect(toMarkdown(fixture)).toMatchSnapshot()
+      expect(toMarkdown(fixture)).toMatchSnapshot(`m${i}`)
     })
   })
 })
@@ -156,4 +165,14 @@ test('compiles to Markdown', () => {
     # foo
     @**I AM CLEM**
   `)).toThrowErrorMatchingSnapshot()
+})
+
+test('do not create ping links in links', () => {
+  return expect(
+    toHTML(dedent`
+      [foo @**I AM CLEM** bar](http://example.com)
+    `).then(vfile => vfile.contents)
+  ).resolves.toBe(dedent`
+    <p><a href="http://example.com">foo <span class="ping ping-in-link">\
+    @<span class="ping-username">I AM CLEM</span></span> bar</a></p>`)
 })

@@ -6,6 +6,7 @@ const visit = require('unist-util-visit')
 const dedent = require('dedent')
 const clone = require('clone')
 
+const fixSVG = require('./utils/svg-hack')
 const createWrapper = require('./utils/wrappers')
 const remarkParse = require('remark-parse')
 const remarkToc = require('remark-toc')
@@ -99,14 +100,24 @@ const zmdParser = (config, target) => {
     .use(remarkSubSuper)
     .use(remarkTrailingSpaceHeading)
     .use(() => (tree, vfile) => {
+      /* extract some metadata for frontends */
+
       // if we don't have any headings, we add a flag to disable
       // the Table of Contents directly in the latex template
       vfile.data.disableToc = true
       visit(tree, 'heading', () => {
         vfile.data.disableToc = false
       })
+
+      // get a unique list of languages used in input
+      const languages = new Set()
+      visit(tree, 'code', (node) => {
+        if (node.lang) languages.add(node.lang)
+      })
+      vfile.data.languages = [...languages]
     })
     .use(() => (tree, vfile) => {
+      // limit AST depth to config.maxNesting
       visit(tree, 'root', (node) => {
         vfile.data.depth = getDepth(node) - 2
       })
@@ -161,28 +172,44 @@ function getHTMLProcessor (remarkConfig, rebberConfig, target) {
     .use(rehypeStringify)
 }
 
-const rendererFactory = ({remarkConfig, rebberConfig}, target = 'html') => (input, cb) => {
-  [remarkConfig, rebberConfig] = [clone(remarkConfig), clone(rebberConfig)]
+const postProcess = {
+  html (vfile) {
+    // SVG hack
+    if (vfile.contents && vfile.contents.includes('<svg')) {
+      vfile.contents = fixSVG(vfile.contents)
+    }
+    return vfile
+  },
+}
 
-  const mdProcessor = target !== 'html'
-    ? getLatexProcessor(remarkConfig, rebberConfig, target)
-    : getHTMLProcessor(remarkConfig, rebberConfig, target)
+const rendererFactory = ({remarkConfig, rebberConfig}, target = 'html') => {
 
+  const postProcessFn = postProcess.hasOwnProperty(target) ? postProcess[target] : undefined
 
-  if (typeof cb !== 'function') {
-    return new Promise((resolve, reject) =>
-      mdProcessor.process(input, (err, vfile) => {
-        if (err) return reject(err)
+  return (input, cb) => {
+    [remarkConfig, rebberConfig] = [clone(remarkConfig), clone(rebberConfig)]
 
-        resolve(vfile)
-      }))
+    const mdProcessor = target !== 'html'
+      ? getLatexProcessor(remarkConfig, rebberConfig, target)
+      : getHTMLProcessor(remarkConfig, rebberConfig, target)
+
+    if (typeof cb !== 'function') {
+      return new Promise((resolve, reject) =>
+        mdProcessor.process(input, (err, vfile) => {
+          if (err) return reject(err)
+
+          if (postProcessFn) vfile = postProcessFn(vfile)
+          resolve(vfile)
+        }))
+    }
+
+    mdProcessor.process(input, (err, vfile) => {
+      if (err) return cb(err)
+
+      if (postProcessFn) vfile = postProcessFn(vfile)
+      cb(null, vfile)
+    })
   }
-
-  mdProcessor.process(input, (err, vfile) => {
-    if (err) return cb(err)
-
-    cb(null, vfile)
-  })
 }
 
 const mdastParser = (opts) => (zmd) => zmdParser(opts.remarkConfig).parse(zmd)
