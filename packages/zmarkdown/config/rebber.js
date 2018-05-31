@@ -52,7 +52,7 @@ const rebberConfig = {
     },
   },
   link: {
-    prefix: 'http://zestedesavoir.com',
+    prefix: 'https://eskimon.fr',
   },
   image: {
     inlineImage: (node) => `\\inlineImage{${node.url}}`,
